@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News | Aggregator</title>
+    <meta name="description" content="Aggregator news feed in a separate tab.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <!-- Particle Background -->
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="app-container">
+        <header class="header">
+            <a href="/" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32"
+                                gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#7b2cbf" />
+                                <stop offset="1" stop-color="#9d4edd" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M16 2L4 9V23L16 30L28 23V9L16 2Z" fill="url(#logoGradient)" fill-opacity="0.2"
+                            stroke="url(#logoGradient)" stroke-width="2" />
+                        <path d="M16 8L23 12V20L16 24L9 20V12L16 8Z" fill="url(#logoGradient)" />
+                    </svg>
+                </div>
+                <span class="logo-text">Swap</span>
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <a href="/" class="nav-link">Swap</a>
+                <a href="/deposit/" class="nav-link">Deposit</a>
+                <a href="/news/" class="nav-link active">News</a>
+                <a href="/admin-profile/" class="nav-link" id="adminNavLink" style="display: none;">Admin</a>
+            </nav>
+            <a href="/" class="btn btn-secondary">Open App</a>
+        </header>
+
+        <main class="main-content">
+            <section class="news-shell">
+                <div class="news-header">
+                    <h1 class="news-title">Aggregator News</h1>
+                </div>
+                <div id="newsList" class="news-list">
+                    <div class="transaction-empty">Loading news...</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Show admin link if user is admin
+        (function () {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const adminLink = document.getElementById('adminNavLink');
+            if (adminLink && user && user.isAdmin) {
+                adminLink.style.display = '';
+            }
+        })();
+    </script>
+    <script src="/static/particles.js"></script>
+    <script src="/static/news.js"></script>
+</body>
+
+</html>

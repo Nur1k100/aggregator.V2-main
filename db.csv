@@ -1,0 +1,26 @@
+Role;Email;Password;Notes
+Admin;admin@aggregator.local;admin;Superuser
+Admin;daniyar@gmail.com;daniyar;Co-Admin
+User 1;student01@aggregator.local;student123;
+User 2;student02@aggregator.local;student123;
+User 3;student03@aggregator.local;student123;
+User 4;student04@aggregator.local;student123;
+User 5;student05@aggregator.local;student123;
+User 6;student06@aggregator.local;student123;
+User 7;student07@aggregator.local;student123;
+User 8;student08@aggregator.local;student123;
+User 9;student09@aggregator.local;student123;
+User 10;student10@aggregator.local;student123;
+User 11;student11@aggregator.local;student123;
+User 12;student12@aggregator.local;student123;
+User 13;student13@aggregator.local;student123;
+User 14;student14@aggregator.local;student123;
+User 15;student15@aggregator.local;student123;
+User 16;student16@aggregator.local;student123;
+User 17;student17@aggregator.local;student123;
+User 18;student18@aggregator.local;student123;
+User 19;student19@aggregator.local;student123;
+User 20;student20@aggregator.local;student123;
+User 21;student21@aggregator.local;student123;
+User 22;student22@aggregator.local;student123;
+User 23;student23@aggregator.local;student123;

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jupiter Swap | Token Swap on Solana</title>
+    <meta name="description"
+        content="Swap tokens on Solana with the best rates using Jupiter Ultra API. Fast, secure, and MEV-protected.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Background Effects -->
+        <div class="bg-gradient"></div>
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="url(#logoGradient)" stroke-width="2" />
+                    <path d="M12 20L18 26L28 14" stroke="url(#logoGradient)" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#9945FF" />
+                            <stop offset="100%" stop-color="#14F195" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span class="logo-text">Jupiter Swap</span>
+            </div>
+            <button id="connectWalletBtn" class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16" />
+                    <path d="M3 21h18" />
+                    <path d="M9 7h6" />
+                    <path d="M9 11h6" />
+                </svg>
+                <span>Connect Wallet</span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Swap Card -->
+            <div class="swap-card">
+                <div class="swap-card-header">
+                    <h1 class="swap-title">Swap</h1>
+                    <div class="swap-settings">
+                        <button id="settingsBtn" class="icon-btn" title="Settings">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3" />
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- From Token -->
+                <div class="token-input-container">
+                    <label class="token-label">You Pay</label>
+                    <div class="token-input-wrapper">
+                        <input type="number" id="fromAmount" class="token-amount-input" placeholder="0.00" min="0"
+                            step="any">
+                        <button id="fromTokenBtn" class="token-select-btn">
+                            <div class="token-icon-placeholder" id="fromTokenIcon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 8v8M8 12h8" />
+                                </svg>
+                            </div>
+                            <span id="fromTokenSymbol">Select</span>
+                            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="token-balance">
+                        <span id="fromBalance">Balance: --</span>
+                        <button id="maxBtn" class="max-btn">MAX</button>
+                    </div>
+                </div>
+
+                <!-- Swap Direction Button -->
+                <div class="swap-direction-wrapper">
+                    <button id="swapDirectionBtn" class="swap-direction-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M7 16V4M7 4L3 8M7 4L11 8" />
+                            <path d="M17 8v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- To Token -->
+                <div class="token-input-container">
+                    <label class="token-label">You Receive</label>
+                    <div class="token-input-wrapper">
+                        <input type="number" id="toAmount" class="token-amount-input" placeholder="0.00" readonly>
+                        <button id="toTokenBtn" class="token-select-btn">
+                            <div class="token-icon-placeholder" id="toTokenIcon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="M12 8v8M8 12h8" />
+                                </svg>
+                            </div>
+                            <span id="toTokenSymbol">Select</span>
+                            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="token-balance">
+                        <span id="toBalance">Balance: --</span>
+                    </div>
+                </div>
+
+                <!-- Swap Details -->
+                <div id="swapDetails" class="swap-details hidden">
+                    <div class="detail-row">
+                        <span class="detail-label">Rate</span>
+                        <span id="swapRate" class="detail-value">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Price Impact</span>
+                        <span id="priceImpact" class="detail-value">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Slippage</span>
+                        <span id="slippage" class="detail-value">--</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Network Fee</span>
+                        <span id="networkFee" class="detail-value">--</span>
+                    </div>
+                </div>
+
+                <!-- Swap Button -->
+                <button id="swapBtn" class="btn btn-swap" disabled>
+                    <span id="swapBtnText">Select tokens to swap</span>
+                    <div id="swapLoader" class="loader hidden"></div>
+                </button>
+            </div>
+
+            <!-- Token Info Panel -->
+            <div id="tokenInfoPanel" class="token-info-panel hidden">
+                <div class="token-info-header">
+                    <img id="tokenInfoIcon" class="token-info-icon" src="" alt="">
+                    <div class="token-info-title">
+                        <h2 id="tokenInfoName">--</h2>
+                        <span id="tokenInfoSymbol" class="token-info-symbol">--</span>
+                    </div>
+                    <button id="closeTokenInfo" class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="token-stats-grid">
+                    <div class="token-stat">
+                        <span class="stat-label">Price</span>
+                        <span id="tokenPrice" class="stat-value">--</span>
+                    </div>
+                    <div class="token-stat">
+                        <span class="stat-label">Market Cap</span>
+                        <span id="tokenMcap" class="stat-value">--</span>
+                    </div>
+                    <div class="token-stat">
+                        <span class="stat-label">24h Change</span>
+                        <span id="tokenChange" class="stat-value">--</span>
+                    </div>
+                    <div class="token-stat">
+                        <span class="stat-label">Holders</span>
+                        <span id="tokenHolders" class="stat-value">--</span>
+                    </div>
+                    <div class="token-stat">
+                        <span class="stat-label">Liquidity</span>
+                        <span id="tokenLiquidity" class="stat-value">--</span>
+                    </div>
+                    <div class="token-stat">
+                        <span class="stat-label">Organic Score</span>
+                        <span id="tokenOrganic" class="stat-value">--</span>
+                    </div>
+                </div>
+
+                <!-- Token Warnings -->
+                <div id="tokenWarnings" class="token-warnings hidden">
+                    <h3 class="warnings-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        Warnings
+                    </h3>
+                    <div id="warningsList" class="warnings-list"></div>
+                </div>
+
+                <!-- Token Tags -->
+                <div id="tokenTags" class="token-tags"></div>
+            </div>
+        </main>
+
+        <!-- Token Select Modal -->
+        <div id="tokenModal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Select Token</h2>
+                    <button id="closeModalBtn" class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="tokenSearchInput" class="token-search-input"
+                        placeholder="Search by name, symbol, or address">
+                </div>
+                <div id="tokenList" class="token-list">
+                    <div class="token-list-loading">
+                        <div class="loader"></div>
+                        <span>Search for tokens...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

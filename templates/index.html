@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggregator | Swap Dashboard</title>
+    <meta name="description" content="Aggregator demo project: swap, новости, админ-профиль и статистика.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <!-- Particle Background -->
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32"
+                                gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#7b2cbf" />
+                                <stop offset="1" stop-color="#9d4edd" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M16 2L4 9V23L16 30L28 23V9L16 2Z" fill="url(#logoGradient)" fill-opacity="0.2"
+                            stroke="url(#logoGradient)" stroke-width="2" />
+                        <path d="M16 8L23 12V20L16 24L9 20V12L16 8Z" fill="url(#logoGradient)" />
+                    </svg>
+                </div>
+                <span class="logo-text">Swap</span>
+            </div>
+            <nav class="main-nav" id="mainNav">
+                <a href="/" class="nav-link active">Swap</a>
+                <a href="/deposit/" class="nav-link">Deposit</a>
+                <a href="/news/" class="nav-link">News</a>
+                <a href="/admin-profile/" class="nav-link" id="adminNavLink" style="display: none;">Admin</a>
+            </nav>
+            <div class="header-right">
+                <!-- Currency Selector -->
+                <div class="currency-selector">
+                    <button id="currencyBtn" class="currency-btn">
+                        <span id="currencyLabel">USD</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div id="currencyDropdown" class="currency-dropdown hidden">
+                        <button class="currency-option active" data-currency="USD">USD ($)</button>
+                        <button class="currency-option" data-currency="EUR">EUR (€)</button>
+                        <button class="currency-option" data-currency="RUB">RUB (₽)</button>
+                        <button class="currency-option" data-currency="KZT">KZT (₸)</button>
+                    </div>
+                </div>
+                <!-- Search Button -->
+                <button id="searchBtn" class="search-btn" title="Search Crypto">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                </button>
+                <!-- Login Button -->
+                <button id="loginBtn" class="btn btn-login">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
+                    </svg>
+                    <span id="loginBtnText">Login</span>
+                </button>
+                <!-- Logout Button (hidden by default) -->
+                <button id="logoutBtn" class="btn btn-outline hidden">Logout</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-grid">
+                <!-- Left Panel - Chart -->
+                <div class="chart-panel">
+                    <div class="chart-header">
+                        <div class="chart-token-info">
+                            <div class="chart-token-selector">
+                                <button id="chartTokenBtn" class="chart-token-btn">
+                                    <span id="chartPair">SOL/USD</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M6 9l6 6 6-6" />
+                                    </svg>
+                                </button>
+                                <div id="chartTokenDropdown" class="chart-token-dropdown hidden">
+                                    <button class="chart-token-option active" data-token="SOL">SOL/USD</button>
+                                    <button class="chart-token-option" data-token="USDC">USDC/USD</button>
+                                    <button class="chart-token-option" data-token="USDT">USDT/USD</button>
+                                    <button class="chart-token-option" data-token="BONK">BONK/USD</button>
+                                    <button class="chart-token-option" data-token="JUP">JUP/USD</button>
+                                </div>
+                            </div>
+                            <span class="chart-change negative" id="chartChange">-0.00%</span>
+                        </div>
+                        <div class="chart-timeframes">
+                            <button class="timeframe-btn" data-days="0.0416">1H</button>
+                            <button class="timeframe-btn active" data-days="1">1D</button>
+                            <button class="timeframe-btn" data-days="7">1W</button>
+                        </div>
+                    </div>
+                    <div class="chart-price-row">
+                        <span class="chart-price" id="chartPrice">$0.00</span>
+                        <span class="chart-price-change" id="chartPriceChange">$0.00 today</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Swap Widget -->
+                <div class="swap-panel">
+                    <div class="swap-card">
+                        <div class="swap-card-header">
+                            <h1 class="swap-title">Swap (Student Demo)</h1>
+                            <button id="settingsBtn" class="icon-btn" title="Settings">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3" />
+                                    <path
+                                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- From Token -->
+                        <div class="token-input-container">
+                            <div class="token-input-header">
+                                <label class="token-label">From</label>
+                                <span class="token-balance" id="fromBalance">Balance: 0.00</span>
+                            </div>
+                            <div class="token-input-wrapper">
+                                <input type="number" id="fromAmount" class="token-amount-input" placeholder="0.0"
+                                    min="0" step="any">
+                                <button id="fromTokenBtn" class="token-select-btn">
+                                    <img id="fromTokenIcon" class="token-btn-icon" src="" alt="">
+                                    <span id="fromTokenSymbol">SOL</span>
+                                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M6 9l6 6 6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="token-usd-value" id="fromUsdValue">≈ $0.00</div>
+                        </div>
+
+                        <!-- Swap Direction Button -->
+                        <div class="swap-direction-wrapper">
+                            <button id="swapDirectionBtn" class="swap-direction-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M7 10l5-5 5 5M7 14l5 5 5-5" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- To Token -->
+                        <div class="token-input-container">
+                            <div class="token-input-header">
+                                <label class="token-label">To</label>
+                                <span class="token-balance" id="toBalance">Balance: 0.00</span>
+                            </div>
+                            <div class="token-input-wrapper">
+                                <input type="number" id="toAmount" class="token-amount-input" placeholder="0.0"
+                                    readonly>
+                                <button id="toTokenBtn" class="token-select-btn">
+                                    <img id="toTokenIcon" class="token-btn-icon" src="" alt="">
+                                    <span id="toTokenSymbol">USDC</span>
+                                    <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M6 9l6 6 6-6" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="token-usd-value" id="toUsdValue">≈ $0.00</div>
+                        </div>
+
+                        <!-- Swap Details -->
+                        <div id="swapDetails" class="swap-details">
+                            <div class="detail-row">
+                                <span class="detail-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        class="detail-icon">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 16v-4M12 8h.01" />
+                                    </svg>
+                                    Rate
+                                </span>
+                                <span id="swapRate" class="detail-value">1 SOL = 0 USDC</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Fee</span>
+                                <span id="swapFee" class="detail-value">0.3%</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Slippage</span>
+                                <span id="swapSlippage" class="detail-value">0.5%</span>
+                            </div>
+                        </div>
+
+                        <!-- Swap Button -->
+                        <button id="swapBtn" class="btn btn-swap" disabled>
+                            <span id="swapBtnText">Connect Wallet</span>
+                            <div id="swapLoader" class="loader hidden"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="transactions-section" id="transactionsSection">
+                <h2 class="section-title">My Transactions</h2>
+                <div class="transactions-list" id="transactionsList">
+                    <div class="transaction-empty">No transactions yet</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-auth">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="authModalTitle">Login</h2>
+                    <button id="closeLoginModal" class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <form id="authForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="authEmail">Email</label>
+                        <input type="email" id="authEmail" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="authPassword">Password</label>
+                        <input type="password" id="authPassword" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group hidden" id="confirmPasswordGroup">
+                        <label for="authConfirmPassword">Confirm Password</label>
+                        <input type="password" id="authConfirmPassword" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-auth" id="authSubmitBtn">Login</button>
+                </form>
+                <div class="auth-switch">
+                    <span id="authSwitchText">Don't have an account?</span>
+                    <button id="authSwitchBtn" class="btn-link">Sign Up</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token Select Modal -->
+        <div id="tokenModal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Select Token</h2>
+                    <button id="closeTokenModal" class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="search-container">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="tokenSearchInput" class="token-search-input"
+                        placeholder="Search by name, symbol, or address">
+                </div>
+                <div id="tokenList" class="token-list">
+                    <div class="token-list-loading">
+                        <div class="loader"></div>
+                        <span>Loading tokens...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-settings">
+                <div class="modal-header">
+                    <h2 class="modal-title">Settings</h2>
+                    <button id="closeSettingsModal" class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label>Slippage Tolerance</label>
+                        <div class="slippage-options">
+                            <button class="slippage-btn" data-value="0.1">0.1%</button>
+                            <button class="slippage-btn active" data-value="0.5">0.5%</button>
+                            <button class="slippage-btn" data-value="1">1%</button>
+                            <input type="number" id="customSlippage" class="slippage-input" placeholder="Custom"
+                                min="0.01" max="50" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="toast-container"></div>
+
+        <!-- Crypto Search Modal -->
+        <div id="cryptoSearchModal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content modal-search">
+                <div class="modal-header">
+                    <h2 class="modal-title">Search Cryptocurrency</h2>
+                    <button id="closeCryptoSearchModal" class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="crypto-search-form">
+                    <input type="text" id="cryptoSearchInput" class="crypto-search-input"
+                        placeholder="Enter coin name (e.g. Bitcoin, Ethereum)">
+                </div>
+                <div id="cryptoSearchResults" class="crypto-search-results">
+                    <div class="crypto-search-empty">Enter a cryptocurrency name to search</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/particles.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

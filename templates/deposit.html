@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit | Aggregator</title>
+    <meta name="description" content="Deposit tokens to your wallet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+    <!-- Particle Background -->
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="/" class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32"
+                                gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#7b2cbf" />
+                                <stop offset="1" stop-color="#9d4edd" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M16 2L4 9V23L16 30L28 23V9L16 2Z" fill="url(#logoGradient)" fill-opacity="0.2"
+                            stroke="url(#logoGradient)" stroke-width="2" />
+                        <path d="M16 8L23 12V20L16 24L9 20V12L16 8Z" fill="url(#logoGradient)" />
+                    </svg>
+                </div>
+                <span class="logo-text">Swap</span>
+            </a>
+            <nav class="main-nav" id="mainNav">
+                <a href="/" class="nav-link">Swap</a>
+                <a href="/deposit/" class="nav-link active">Deposit</a>
+                <a href="/news/" class="nav-link">News</a>
+                <a href="/admin-profile/" class="nav-link" id="adminNavLink" style="display: none;">Admin</a>
+            </nav>
+            <div class="header-actions">
+                <a href="/" class="btn btn-secondary">Back to Swap</a>
+                <button id="logoutBtn" class="btn btn-outline">Logout</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content deposit-page">
+            <div class="deposit-card">
+                <h1 class="deposit-title">Deposit Funds</h1>
+                <p class="deposit-subtitle">Add tokens to your mock wallet to start trading</p>
+
+                <!-- Current Balances -->
+                <div class="balances-section">
+                    <h2 class="section-subtitle">Your Balances</h2>
+                    <div id="balancesList" class="balances-list">
+                        <div class="balance-loading">
+                            <div class="loader"></div>
+                            <span>Loading balances...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit Form -->
+                <div class="deposit-form-section">
+                    <h2 class="section-subtitle">Add Tokens</h2>
+                    <form id="depositForm" class="deposit-form">
+                        <div class="form-group">
+                            <label for="depositToken">Select Token</label>
+                            <select id="depositToken" class="form-select" required>
+                                <option value="So11111111111111111111111111111111111111112">SOL - Solana</option>
+                                <option value="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v">USDC - USD Coin</option>
+                                <option value="Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB">USDT - Tether USD</option>
+                                <option value="DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263">BONK - Bonk</option>
+                                <option value="JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN">JUP - Jupiter</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="depositAmount">Amount</label>
+                            <input type="number" id="depositAmount" class="form-input" placeholder="Enter amount"
+                                min="0.0001" step="any" required>
+                        </div>
+                        <button type="submit" class="btn btn-deposit" id="depositBtn">
+                            <span id="depositBtnText">Deposit</span>
+                            <div id="depositLoader" class="loader hidden"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Quick Deposit Amounts -->
+                <div class="quick-deposit">
+                    <span class="quick-label">Quick deposit:</span>
+                    <button class="quick-btn" data-amount="1">1</button>
+                    <button class="quick-btn" data-amount="10">10</button>
+                    <button class="quick-btn" data-amount="100">100</button>
+                    <button class="quick-btn" data-amount="1000">1000</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Container -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <script>
+        // Deposit page JavaScript
+        const API_BASE = '/api';
+
+        // Get auth token
+        function getToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        // Check authentication
+        function checkAuth() {
+            const token = getToken();
+            if (!token) {
+                window.location.href = '/';
+                return false;
+            }
+            return true;
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="toast-close">&times;</button>
+            `;
+            container.appendChild(toast);
+
+            toast.querySelector('.toast-close').onclick = () => toast.remove();
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Load balances
+        async function loadBalances() {
+            const token = getToken();
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/wallet/balance/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                const container = document.getElementById('balancesList');
+
+                if (data.balances && data.balances.length > 0) {
+                    container.innerHTML = data.balances.map(b => `
+                        <div class="balance-item">
+                            <div class="balance-token">
+                                <img class="balance-icon" src="${b.icon}" alt="${b.symbol}" onerror="this.style.display='none'">
+                                <div class="balance-info">
+                                    <span class="balance-symbol">${b.symbol}</span>
+                                    <span class="balance-name">${b.name}</span>
+                                </div>
+                            </div>
+                            <span class="balance-amount">${parseFloat(b.balance).toFixed(4)}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div class="balance-empty">No tokens yet. Deposit some below!</div>';
+                }
+            } catch (error) {
+                console.error('Failed to load balances:', error);
+            }
+        }
+
+        // Handle deposit
+        async function handleDeposit(e) {
+            e.preventDefault();
+
+            const token = getToken();
+            if (!token) {
+                showToast('Please login first', 'error');
+                return;
+            }
+
+            const tokenMint = document.getElementById('depositToken').value;
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('depositBtn');
+            const btnText = document.getElementById('depositBtnText');
+            const loader = document.getElementById('depositLoader');
+
+            btn.disabled = true;
+            btnText.textContent = 'Depositing...';
+            loader.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}/wallet/deposit/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ tokenMint, amount })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(`Successfully deposited ${amount} ${data.token}!`, 'success');
+                    document.getElementById('depositAmount').value = '';
+                    loadBalances();
+                } else {
+                    showToast(data.error || 'Deposit failed', 'error');
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = 'Deposit';
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Quick deposit buttons
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('depositAmount').value = btn.dataset.amount;
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            window.location.href = '/';
+        });
+
+        // Initialize
+        document.getElementById('depositForm').addEventListener('submit', handleDeposit);
+
+        // Show admin link if user is admin
+        function updateAdminVisibility() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const adminLink = document.getElementById('adminNavLink');
+            if (adminLink && user && user.isAdmin) {
+                adminLink.style.display = '';
+            }
+        }
+
+        if (checkAuth()) {
+            loadBalances();
+            updateAdminVisibility();
+        }
+    </script>
+    <script src="/static/particles.js"></script>
+</body>
+
+</html>
